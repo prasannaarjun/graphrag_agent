@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.admin_routes import router as admin_router
 from src.api.auth_routes import router as auth_router
+from src.api.document_routes import router as document_router
 from src.config import get_settings
 
 settings = get_settings()
@@ -35,6 +36,7 @@ app.add_middleware(
 # Include routers
 app.include_router(admin_router)
 app.include_router(auth_router)
+app.include_router(document_router)
 
 
 @app.on_event("startup")
