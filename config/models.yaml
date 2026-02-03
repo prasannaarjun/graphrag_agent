@@ -1,0 +1,63 @@
+# Available LLM and Embedding models
+# This is the single source of truth for model configuration
+
+default_model: llama-3.3-70b
+default_embedding: minilm
+
+providers:
+  groq:
+    name: Groq
+    api_key_env: GROQ_API_KEY
+    models:
+      - id: llama-3.3-70b
+        name: Llama 3.3 70B
+        model_id: llama-3.3-70b-versatile
+        context_window: 128000
+        description: Most capable Llama model, best for complex reasoning
+        recommended: true
+        
+      - id: llama-3.1-8b
+        name: Llama 3.1 8B
+        model_id: llama-3.1-8b-instant
+        context_window: 128000
+        description: Fast and efficient for simpler tasks
+        
+      - id: mixtral-8x7b
+        name: Mixtral 8x7B
+        model_id: mixtral-8x7b-32768
+        context_window: 32768
+        description: Mixture of experts model, good balance
+        
+      - id: gemma2-9b
+        name: Gemma 2 9B
+        model_id: gemma2-9b-it
+        context_window: 8192
+        description: Google's efficient instruction-tuned model
+        
+      - id: deepseek-r1-70b
+        name: DeepSeek R1 70B
+        model_id: deepseek-r1-distill-llama-70b
+        context_window: 128000
+        description: Reasoning-focused model
+
+# Embedding models (local HuggingFace - NOT Groq)
+# These run locally using sentence-transformers
+embeddings:
+  - id: minilm
+    name: MiniLM L6 v2
+    model_id: sentence-transformers/all-MiniLM-L6-v2
+    dimension: 384
+    description: Fast, lightweight embeddings (recommended)
+    recommended: true
+    
+  - id: bge-small
+    name: BGE Small
+    model_id: BAAI/bge-small-en-v1.5
+    dimension: 384
+    description: High quality small embeddings
+    
+  - id: bge-large
+    name: BGE Large
+    model_id: BAAI/bge-large-en-v1.5
+    dimension: 1024
+    description: Best quality, larger size
