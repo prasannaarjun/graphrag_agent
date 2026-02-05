@@ -25,8 +25,9 @@ class User(Base):
     email: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     avatar_url: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    provider: Mapped[str] = mapped_column(String, nullable=False)
-    provider_user_id: Mapped[str] = mapped_column(String, nullable=False)
+    hashed_password: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    provider: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    provider_user_id: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime, onupdate=func.now())
 

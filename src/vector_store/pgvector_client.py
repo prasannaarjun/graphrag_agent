@@ -72,13 +72,14 @@ class PgVectorClient:
 
         async with get_db_session() as session:
             # Set tenant context for RLS
+            # Note: SET doesn't support bind parameters in PostgreSQL
             await session.execute(text(f"SET app.current_tenant_id = '{tenant_id}'"))
 
             query = text("""
                 INSERT INTO document_chunks
                 (id, tenant_id, doc_id, content, embedding, chunk_index, metadata)
                 VALUES
-                (:id, :tenant_id, :doc_id, :content, :embedding::vector, :chunk_index, :metadata)
+                (:id, :tenant_id, :doc_id, :content, CAST(:embedding AS vector), :chunk_index, :metadata)
             """)
 
             await session.execute(
@@ -123,7 +124,7 @@ class PgVectorClient:
                     INSERT INTO document_chunks
                     (id, tenant_id, doc_id, content, embedding, chunk_index, metadata)
                     VALUES
-                    (:id, :tenant_id, :doc_id, :content, :embedding::vector, :chunk_index, :metadata)
+                    (:id, :tenant_id, :doc_id, :content, CAST(:embedding AS vector), :chunk_index, :metadata)
                 """)
 
                 await session.execute(
@@ -168,7 +169,7 @@ class PgVectorClient:
             # Build query with optional doc_id filter
             base_query = """
                 SELECT id, tenant_id, doc_id, content, chunk_index, metadata,
-                       1 - (embedding <=> :embedding::vector) as similarity
+                       1 - (embedding <=> CAST(:embedding AS vector)) as similarity
                 FROM document_chunks
                 WHERE tenant_id = :tenant_id
             """
@@ -176,7 +177,7 @@ class PgVectorClient:
             if doc_id:
                 base_query += " AND doc_id = :doc_id"
 
-            base_query += " ORDER BY embedding <=> :embedding::vector LIMIT :limit"
+            base_query += " ORDER BY embedding <=> CAST(:embedding AS vector) LIMIT :limit"
 
             params = {
                 "embedding": f"[{','.join(map(str, query_embedding))}]",

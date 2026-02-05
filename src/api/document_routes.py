@@ -10,6 +10,7 @@ from pydantic import BaseModel
 from src.auth.dependencies import get_current_user
 from src.core.tenant import TenantContext
 from src.indexing import DocumentLoaderFactory, get_document_processor, load_documents_from_bytes
+from src.knowledge_graph import get_entity_extractor, get_graph_client
 from src.llm import get_embedding_model
 from src.object_store import get_minio_client
 from src.vector_store import DocumentChunk, get_pgvector_client
@@ -117,15 +118,35 @@ async def upload_document(
 
         await pgvector.insert_chunks_batch(db_chunks)
 
+        # 5. Extract entities and build knowledge graph
+        graph = get_graph_client()
+        extractor = get_entity_extractor()
+
+        entities_extracted = 0
+        for chunk in chunks:
+            try:
+                result = await extractor.extract_and_store(
+                    text=chunk.content,
+                    doc_id=doc_id,
+                    graph_client=graph,
+                )
+                entities_extracted += len(result.entities)
+            except Exception as extraction_error:
+                # Log but don't fail the upload if extraction fails
+                print(f"Warning: Entity extraction failed for chunk: {extraction_error}")
+
         return DocumentResponse(
             id=doc_id,
             filename=file.filename,
             size=file_size,
             chunks=len(chunks),
-            status="indexed",
+            status=f"indexed (extracted {entities_extracted} entities)",
         )
 
     except Exception as e:
+        import traceback
+
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Failed to process document: {str(e)}")
 
 

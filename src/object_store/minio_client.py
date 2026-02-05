@@ -2,7 +2,8 @@
 MinIO object storage client with tenant-scoped bucket isolation.
 """
 
-from typing import BinaryIO, Optional
+import io
+from typing import BinaryIO, Optional, Union
 
 from minio import Minio
 from minio.error import S3Error
@@ -46,7 +47,7 @@ class MinioClient:
 
     async def upload_file(
         self,
-        file_data: BinaryIO,
+        file_data: Union[BinaryIO, bytes],
         object_name: str,
         content_type: str = "application/octet-stream",
         metadata: Optional[dict] = None,
@@ -65,6 +66,10 @@ class MinioClient:
         """
         await self.ensure_bucket_exists()
         bucket_name = self._get_bucket_name()
+
+        # Ensure file_data is a file-like object
+        if isinstance(file_data, bytes):
+            file_data = io.BytesIO(file_data)
 
         # Get file size
         file_data.seek(0, 2)

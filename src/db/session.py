@@ -5,6 +5,7 @@ Async database session management.
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from src.config import get_settings
@@ -54,9 +55,11 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
     async with session_factory() as session:
         try:
             # Set tenant context for RLS
+            # Note: SET command doesn't support bind parameters in PostgreSQL, so we use
+            # string interpolation. The tenant_id is validated during authentication.
             tenant_ctx = TenantContext.get_current_or_none()
             if tenant_ctx:
-                await session.execute(f"SET app.current_tenant_id = '{tenant_ctx.tenant_id}'")
+                await session.execute(text(f"SET app.current_tenant_id = '{tenant_ctx.tenant_id}'"))
 
             yield session
             await session.commit()

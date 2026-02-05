@@ -5,37 +5,38 @@ FastAPI dependencies for authentication.
 from typing import Optional
 
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi.security import (
+    HTTPAuthorizationCredentials,
+    HTTPBearer,
+    OAuth2PasswordBearer,
+)
 
 from src.auth.jwt import decode_token
 from src.core.tenant import TenantContext
 
-# HTTP Bearer token security scheme
+# HTTP Bearer token security scheme (generic)
 security = HTTPBearer(auto_error=False)
+
+# OAuth2 Password Bearer scheme (specifically for Swagger UI)
+# username field in form will be treated as email
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token", auto_error=False)
 
 
 async def get_current_user(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+    token: Optional[str] = Depends(oauth2_scheme),
 ) -> TenantContext:
     """
     Dependency to get the current authenticated user.
-
-    Can be used in route handlers to require authentication:
-
-        @router.get("/protected")
-        async def protected_route(user: TenantContext = Depends(get_current_user)):
-            return {"tenant_id": user.tenant_id}
-
-    Args:
-        credentials: HTTP Bearer credentials from Authorization header
-
-    Returns:
-        TenantContext with user and tenant information
-
-    Raises:
-        HTTPException: If authentication fails
+    Supports both generic HTTPBearer and OAuth2PasswordBearer (Swagger UI).
     """
-    if credentials is None:
+    actual_token = None
+    if credentials:
+        actual_token = credentials.credentials
+    elif token:
+        actual_token = token
+
+    if not actual_token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not authenticated",
@@ -43,7 +44,7 @@ async def get_current_user(
         )
 
     try:
-        payload = decode_token(credentials.credentials)
+        payload = decode_token(actual_token)
 
         # Create and return tenant context
         return TenantContext(
@@ -61,21 +62,22 @@ async def get_current_user(
 
 async def get_optional_user(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+    token: Optional[str] = Depends(oauth2_scheme),
 ) -> Optional[TenantContext]:
     """
     Dependency to optionally get the current user.
-
-    Returns None if no valid token is provided instead of raising an error.
-    Useful for endpoints that work differently for authenticated users.
-
-    Returns:
-        TenantContext if authenticated, None otherwise
     """
-    if credentials is None:
+    actual_token = None
+    if credentials:
+        actual_token = credentials.credentials
+    elif token:
+        actual_token = token
+
+    if not actual_token:
         return None
 
     try:
-        payload = decode_token(credentials.credentials)
+        payload = decode_token(actual_token)
         return TenantContext(
             tenant_id=payload.get("tenant_id"),
             user_id=payload.get("user_id"),
