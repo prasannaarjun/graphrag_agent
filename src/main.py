@@ -2,6 +2,8 @@
 FastAPI application entry point.
 """
 
+import logging
+import sys
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -14,6 +16,23 @@ from src.api.models_routes import router as models_router
 from src.config import get_settings
 
 settings = get_settings()
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    stream=sys.stdout,
+    force=True,
+)
+
+# Reduce SQLAlchemy noise
+logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
+logging.getLogger("sqlalchemy.pool").setLevel(logging.WARNING)
+logging.getLogger("sqlalchemy.dialects").setLevel(logging.WARNING)
+
+# Reduce async db noise
+logging.getLogger("asyncpg").setLevel(logging.WARNING)
 
 app = FastAPI(
     title="GraphRAG Agent API",

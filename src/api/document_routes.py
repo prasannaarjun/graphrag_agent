@@ -2,6 +2,7 @@
 Document management API routes.
 """
 
+import logging
 import uuid
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
@@ -14,6 +15,8 @@ from src.knowledge_graph import get_entity_extractor, get_graph_client
 from src.llm import get_embedding_model
 from src.object_store import get_minio_client
 from src.vector_store import DocumentChunk, get_pgvector_client
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/documents", tags=["Documents"])
 
@@ -119,7 +122,8 @@ async def upload_document(
         await pgvector.insert_chunks_batch(db_chunks)
 
         # 5. Extract entities and build knowledge graph
-        print(f"[KB BUILD] Starting entity extraction for {len(chunks)} chunks...")
+        doc_id_short = doc_id[:8]
+        logger.info(f"KB_EXTRACT_START | doc={doc_id_short} | chunks={len(chunks)}")
 
         graph = get_graph_client()
         extractor = get_entity_extractor()
@@ -127,26 +131,22 @@ async def upload_document(
         entities_extracted = 0
         for idx, chunk in enumerate(chunks):
             try:
-                print(f"[KB BUILD] Extracting entities from chunk {idx + 1}/{len(chunks)}...")
                 result = await extractor.extract_and_store(
                     text=chunk.content,
                     doc_id=doc_id,
                     graph_client=graph,
                 )
-                print(
-                    f"[KB BUILD] Chunk {idx + 1}: extracted {len(result.entities)} entities, {len(result.relationships)} relationships"
-                )
                 entities_extracted += len(result.entities)
+                logger.info(
+                    f"KB_CHUNK_EXTRACT | doc={doc_id_short} | chunk={idx + 1}/{len(chunks)} | entities={len(result.entities)} | relations={len(result.relationships)}"
+                )
             except Exception as extraction_error:
                 # Log but don't fail the upload if extraction fails
-                import traceback
-
-                print(
-                    f"[KB BUILD ERROR] Entity extraction failed for chunk {idx + 1}: {extraction_error}"
+                logger.error(
+                    f"KB_CHUNK_ERROR | doc={doc_id_short} | chunk={idx + 1} | {str(extraction_error)}"
                 )
-                traceback.print_exc()
 
-        print(f"[KB BUILD] Entity extraction complete. Total entities: {entities_extracted}")
+        logger.info(f"KB_EXTRACT_COMPLETE | doc={doc_id_short} | total_entities={entities_extracted}")
 
         return DocumentResponse(
             id=doc_id,

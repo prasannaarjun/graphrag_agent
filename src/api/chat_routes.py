@@ -3,6 +3,7 @@ Chat API routes with streaming support.
 """
 
 import json
+import logging
 import uuid
 from typing import Optional
 
@@ -16,6 +17,8 @@ from src.agent import get_agent
 from src.auth.dependencies import get_current_user
 from src.core.tenant import TenantContext
 from src.db import Conversation, Message, get_db_session
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/chat", tags=["Chat"])
 
@@ -163,6 +166,7 @@ async def chat_stream(
     TenantContext.set(user.tenant_id, user.user_id, user.email)
 
     conversation_id = request.conversation_id or str(uuid.uuid4())
+    logger.info(f"CHAT_START | conv={conversation_id[:8]} | user={user.user_id[:8]} | msg_len={len(request.message)}")
 
     async def generate():
         try:
@@ -179,6 +183,7 @@ async def chat_stream(
                 conversation = result.scalar_one_or_none()
 
                 if not conversation:
+                    logger.info(f"CONV_CREATE | conv={conversation_id[:8]}")
                     conversation = Conversation(
                         id=conversation_id,
                         tenant_id=user.tenant_id,
@@ -198,7 +203,10 @@ async def chat_stream(
                     .order_by(Message.created_at)
                 )
 
-                for msg in history_result.scalars().all():
+                messages = history_result.scalars().all()
+                logger.info(f"HISTORY_LOAD | conv={conversation_id[:8]} | count={len(messages)}")
+
+                for msg in messages:
                     if msg.role == "user":
                         history.append(HumanMessage(content=msg.content))
                     else:
@@ -216,18 +224,23 @@ async def chat_stream(
 
             # Send conversation ID first
             yield f"data: {json.dumps({'type': 'start', 'conversation_id': conversation_id})}\n\n"
+            logger.info(f"STREAM_INIT | conv={conversation_id[:8]}")
 
             # Stream response
             agent = get_agent(request.model_id)
             full_response = ""
+            chunk_count = 0
 
             async for chunk in agent.stream_chat(
                 message=request.message,
                 conversation_id=conversation_id,
                 history=history,
             ):
+                chunk_count += 1
                 full_response += chunk
                 yield f"data: {json.dumps({'type': 'chunk', 'content': chunk})}\n\n"
+
+            logger.info(f"STREAM_COMPLETE | conv={conversation_id[:8]} | chunks={chunk_count} | response_len={len(full_response)}")
 
             # Save assistant message
             async with get_db_session() as session:
@@ -243,6 +256,7 @@ async def chat_stream(
             yield f"data: {json.dumps({'type': 'end', 'message_id': assistant_msg.id})}\n\n"
 
         except Exception as e:
+            logger.error(f"STREAM_ERROR | conv={conversation_id[:8]} | error={str(e)}")
             yield f"data: {json.dumps({'type': 'error', 'error': str(e)})}\n\n"
 
     return StreamingResponse(
