@@ -1,0 +1,376 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  /* Typography */
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
+
+  /* Colors */
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-subtle: var(--accent-subtle);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+
+  /* Legacy compatibility mappings */
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--accent);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted-foreground: var(--muted);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-input: var(--input);
+  --color-ring: var(--accent);
+
+  /* Sidebar colors */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-3xl: 20px;
+  --radius-4xl: 24px;
+
+  /* Charts */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+}
+
+:root {
+  /* Refined Minimal Palette - Light Theme */
+
+  /* Core colors */
+  --bg: #fafaf8; /* Warm off-white */
+  --fg: #1a1a1a; /* Rich black */
+  --border: #e5e5e2; /* Subtle warm gray */
+  --muted: #706f6c; /* Warm neutral gray */
+
+  /* Accent colors - Deep forest green */
+  --accent: #2b5c4e;
+  --accent-hover: #234538;
+  --accent-subtle: #eef4f2; /* Pale green tint */
+
+  /* Semantic colors */
+  --destructive: #b5433d; /* Muted terracotta red */
+  --success: #3d7c5c; /* Forest green */
+
+  /* UI element colors */
+  --card: #ffffff; /* Pure white */
+  --card-foreground: #1a1a1a;
+  --popover: #ffffff;
+  --popover-foreground: #1a1a1a;
+  --primary-foreground: #ffffff;
+  --secondary: #f4f4f3;
+  --secondary-foreground: #1a1a1a;
+  --accent-foreground: #ffffff;
+  --input: #e5e5e2;
+
+  /* Sidebar colors */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1a1a1a;
+  --sidebar-primary: #2b5c4e;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #eef4f2;
+  --sidebar-accent-foreground: #2b5c4e;
+  --sidebar-border: #e5e5e2;
+  --sidebar-ring: #2b5c4e;
+
+  /* Chart colors */
+  --chart-1: #2b5c4e;
+  --chart-2: #3d7c5c;
+  --chart-3: #3b82f6;
+  --chart-4: #8b5cf6;
+  --chart-5: #ec4899;
+
+  /* Transitions */
+  --transition: cubic-bezier(0.4, 0.0, 0.2, 1) 250ms;
+  --transition-slow: cubic-bezier(0.4, 0.0, 0.2, 1) 400ms;
+  --transition-emphasis: cubic-bezier(0.34, 1.56, 0.64, 1) 400ms;
+  --transition-exit: cubic-bezier(0.4, 0.0, 1, 1) 150ms;
+
+  /* Shadows - Subtle with soft edges */
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.04);
+  --shadow-md: 0 4px 12px rgb(0 0 0 / 0.05);
+  --shadow-lg: 0 10px 30px rgb(0 0 0 / 0.06);
+  --shadow-xl: 0 20px 40px rgb(0 0 0 / 0.08);
+}
+
+.dark {
+  /* Dark theme refinement */
+  --bg: #121212;
+  --fg: #fafaf8;
+  --border: #282828;
+  --muted: #a3a3a3;
+
+  --accent: #346e5e; /* Lighter forest green for dark mode */
+  --accent-hover: #3d7c5c;
+  --accent-subtle: #1c302a;
+
+  --destructive: #dc433d;
+  --success: #488b67;
+
+  --card: #181818;
+  --card-foreground: #fafaf8;
+  --popover: #181818;
+  --popover-foreground: #fafaf8;
+  --primary-foreground: #fafaf8;
+  --secondary: #202020;
+  --secondary-foreground: #fafaf8;
+  --accent-foreground: #fafaf8;
+  --input: #282828;
+
+  --sidebar: #181818;
+  --sidebar-foreground: #fafaf8;
+  --sidebar-primary: #346e5e;
+  --sidebar-primary-foreground: #fafaf8;
+  --sidebar-accent: #1c302a;
+  --sidebar-accent-foreground: #72d6ad;
+  --sidebar-border: #282828;
+  --sidebar-ring: #346e5e;
+}
+
+/* Animation keyframes */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes breathing {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Base layer styles */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-bg text-fg font-body;
+    font-feature-settings: "kern" 1, "liga" 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+    letter-spacing: -0.02em;
+  }
+
+  h1 {
+    @apply text-5xl leading-tight;
+    letter-spacing: -0.02em;
+  }
+
+  h2 {
+    @apply text-3xl leading-snug;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    @apply text-2xl leading-normal font-body font-medium;
+    letter-spacing: -0.005em;
+  }
+
+  /* Focus visible styles for accessibility */
+  *:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--accent) 50%, transparent);
+    outline-offset: 2px;
+  }
+}
+
+/* Utility classes */
+@layer utilities {
+  .animate-fade-in {
+    animation: fade-in var(--transition);
+  }
+
+  .animate-slide-up {
+    animation: slide-up var(--transition);
+  }
+
+  .animate-slide-down {
+    animation: slide-down var(--transition);
+  }
+
+  .animate-breathing {
+    animation: breathing 2s ease-in-out infinite;
+  }
+
+  .animate-pulse-subtle {
+    animation: pulse-subtle 2s ease-in-out infinite;
+  }
+
+  .animate-scale-in {
+    animation: scale-in var(--transition);
+  }
+
+  /* Staggered animation delays */
+  .animate-delay-0 {
+    animation-delay: 0ms;
+  }
+
+  .animate-delay-1 {
+    animation-delay: 80ms;
+  }
+
+  .animate-delay-2 {
+    animation-delay: 160ms;
+  }
+
+  .animate-delay-3 {
+    animation-delay: 240ms;
+  }
+
+  .animate-delay-4 {
+    animation-delay: 320ms;
+  }
+
+  /* Typography utilities */
+  .text-display {
+    @apply font-display;
+  }
+
+  .text-body {
+    @apply font-body;
+  }
+
+  .text-mono {
+    @apply font-mono;
+  }
+
+  /* Transition utilities */
+  .transition-refined {
+    transition: all var(--transition);
+  }
+
+  .transition-refined-slow {
+    transition: all var(--transition-slow);
+  }
+
+  .transition-emphasis {
+    transition: all var(--transition-emphasis);
+  }
+
+  /* Shadow utilities */
+  .shadow-refined-sm {
+    box-shadow: var(--shadow-sm);
+  }
+
+  .shadow-refined-md {
+    box-shadow: var(--shadow-md);
+  }
+
+  .shadow-refined-lg {
+    box-shadow: var(--shadow-lg);
+  }
+
+  .shadow-refined-xl {
+    box-shadow: var(--shadow-xl);
+  }
+
+  /* Glass morphism utility */
+  .glass {
+    backdrop-filter: blur(12px);
+    background: color-mix(in srgb, var(--bg) 80%, transparent);
+  }
+
+  /* Generous spacing utilities */
+  .spacing-generous {
+    @apply px-6 py-8 md:px-12 md:py-12 lg:px-16 lg:py-16;
+  }
+
+  .spacing-comfortable {
+    @apply px-4 py-6 md:px-8 md:py-8;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -68,5 +68,4 @@ Thumbs.db
 # Jupyter
 .ipynb_checkpoints/
 
-# Agent
-.agent/
+
